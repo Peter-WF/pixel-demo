@@ -1,0 +1,113 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Ads E2E测试落地页</title>
+
+    <style>
+    body {
+      background-color: #ddd;
+    }
+
+    button {
+      padding: 12px;
+      text-align: center;
+      background-color: #363636;
+      color: #fff;
+      font-size: 14px;
+    }
+    iframe {
+      width: 500px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+  </style>
+
+
+  <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+
+      ttq.load('CHIC4FBC77U1H95PTSSG'); //非partner pixel
+      ttq.page();
+    }(window, document, 'ttq');
+    </script>
+
+   <script>
+    var ua = window.navigator.userAgent;
+    var _isAndroid = /(Android);?\s+([\d.]+)?/.test(ua);
+
+    function getFirstPartyCookie(cookie_name) {
+      var allcookies = document.cookie;
+      var cookie_pos = allcookies.indexOf(cookie_name);
+      if (cookie_pos != -1) {
+        cookie_pos += cookie_name.length + 1;
+        var cookie_end = allcookies.indexOf(";", cookie_pos);
+        if (cookie_end == -1)
+        {
+            cookie_end = allcookies.length;
+        }
+        var value = unescape(allcookies.substring(cookie_pos, cookie_end));
+      } else {
+        var value = "";
+      }
+      return value;
+    }
+
+    function getSessionValue(session_key) {
+      var value = sessionStorage.getItem(session_key)
+      return value;
+    }
+
+    function upload_pii() {
+      var value = sessionStorage.getItem(session_key)
+      return value;
+    }
+
+  </script>
+
+  <script src="../../static/vconsole.min.js"></script>
+  <script>
+    var vConsole = new VConsole();
+  </script>
+  <style>
+    iframe {
+      width: 500px;
+      height: 300px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Web Ads E2E测试落地页, pixel_code=CHIC4FBC77U1H95PTSSG</h1>
+  <br>
+    <br>
+    <div>
+      <br>
+      <span>input phone</span>
+      <input id='phone' type="tel" value="">
+      <br>
+      <span>input email</span>
+      <input id='email' type="email" value="">
+      <br>
+      <button onclick="ttq.identify({phone_number: document.getElementById('phone').value.toString(), email: document.getElementById('email').value.toString()})">触发pii信息上报</button>
+      <br>
+      <button onclick="ttq.track('AddToCart')">Trigger AddToCart</button>
+      <br>
+      <button onclick="ttq.track('CompletePayment')">Trigger CompletePayment</button>
+      <br>
+      <button onclick="ttq.track('SubmitForm')">Trigger SubmitForm</button>
+      <br>
+      <button onclick="">Trigger SmartPixel Click</button>
+      <br>
+      <br>
+      <br>
+      <br>
+    </div>
+    <span>iframe区域</span>
+    <iframe id="iframe" src="./web_ads_e2e_iframe_page.html"></iframe>
+
+</body>

@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Ads E2E测试落地页-iframe page</title>
+
+    <style>
+    body {
+      background-color: #f6f5f5;
+    }
+
+    button {
+      padding: 12px;
+      text-align: center;
+      background-color: #363636;
+      color: #fff;
+      font-size: 14px;
+    }
+  </style>
+
+
+  <script>
+    !function (w, d, t) {
+      w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+
+      ttq.load('CHIC4FBC77U1H95PTSSG'); //非partner pixel
+      ttq.page();
+    }(window, document, 'ttq');
+  </script>
+
+</head>
+
+<body>
+  <h1>Web Ads E2E测试落地页-iframe page, pixel_code=CHIC4FBC77U1H95PTSSG</h1>
+  <br>
+    <br>
+    <div>
+      <br>
+      <button onclick="ttq.track('AddToCart')">Trigger AddToCart</button>
+      <br>
+      <button onclick="ttq.track('CompletePayment')">Trigger CompletePayment</button>
+      <br>
+      <button onclick="ttq.track('SubmitForm')">Trigger SubmitForm</button>
+      <br>
+      <button onclick="">Trigger SmartPixel Click</button>
+      <br>
+    </div>
+</body>
