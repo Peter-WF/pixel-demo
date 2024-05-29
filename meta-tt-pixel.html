@@ -20,6 +20,8 @@
   <meta property="og:price:amount" content="24200" />
   <meta name="branch:deeplink:$deeplink_path" content="x-callback-url/product-details?style-color=FB2391-900" />
   <script>
+    const pixelCode = new URL(location.href).searchParams.get('pixel') || 'MOCK_PIXEL'
+
     !function (w, d, t) {
       w.TiktokAnalyticsObject = t;
       var ttq = w[t] = w[t] || [];
@@ -41,7 +43,7 @@
         a.parentNode.insertBefore(o, a)
       };
 
-      ttq.load('MOCK_PIXEL');
+      ttq.load(pixelCode);
       ttq.page();
     }(window, document, 'ttq');
   </script>
