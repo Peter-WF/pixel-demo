@@ -21,6 +21,8 @@
   <meta name="branch:deeplink:$deeplink_path" content="x-callback-url/product-details?style-color=FB2391-900" />
   <script>
     const pixelCode = new URL(location.href).searchParams.get('pixel') || 'MOCK_PIXEL'
+    const metaPixelCode = new URL(location.href).searchParams.get('meta_pixel') || '889402761892015'
+    const gaPixelCode = new URL(location.href).searchParams.get('ga_pixel') || 'G-W501CH8367'
 
     !function (w, d, t) {
       w.TiktokAnalyticsObject = t;
@@ -66,12 +68,25 @@
       s.parentNode.insertBefore(t, s)
     }(window, document, 'script',
       'https://connect.facebook.net/en_US/fbevents.js')
-    fbq('init', '889402761892015')
+    fbq('init', metaPixelCode)
     fbq('track', 'PageView')
   </script>
-  <noscript>
-    <img height="1" width="1" style="display:none"
-         src="https://www.facebook.com/tr?id=889402761892015&ev=PageView&noscript=1" /></noscript>
+  <!-- Google tag (gtag.js) -->
+  <script>
+    function loadGATag(code) {
+      const script = document.createElement('script');
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${code}`;
+      script.async = true;
+      document.head.appendChild(script);
+      script.onload = function () {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', code);
+      }
+    }
+    loadGATag(gaPixelCode)
+  </script>
   <script type="application/ld+json" data-rh="true">
     {
       "@context": "http://schema.org",
