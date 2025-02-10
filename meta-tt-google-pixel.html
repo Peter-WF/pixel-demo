@@ -374,6 +374,16 @@
   </div>
   ...
 </div>
+<script>
+  function longTask(duration) {
+    const start = Date.now()
+    while (Date.now() - start < duration) {
+      // 模拟一个计算密集型任务，持续指定的时间（毫秒）
+    }
+    console.log('Task finished.')
+  }
+  longTask(1000)
+</script>
 </body>
 </body>
 </html>
