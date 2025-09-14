@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta
+        name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>TikTok Pixel Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="../lib/vue.js"></script>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.0/jsoneditor.min.css"
+        integrity="sha512-8G+Vb2+10BSrSo+wupdzJIylDLpGtEYniQhp0rsbTigPG7Onn2S08Ai/KEGlxN2Ncx9fGqVHtRehMuOjPb9f8g=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.1.0/jsoneditor.min.js"
+        integrity="sha512-PInE2t9LrzM/U5c/sB27ZCv/thNDKIA1DgRBzOcvaq21qlnQ/yI/YvzJMLdzsM1MvmX9j4TQLFi8+2+rTkdR4w=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    ></script>
+    <script src="../lib/lodash.min.js"></script>
+    <script src="../lib/vconsole.min.js"></script>
+    <script src="../lib/mock-jsbridge.js"></script>
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        rel="stylesheet"
+    />
+
+    <script>
+        var observer = new PerformanceObserver(function(list) {
+            var perfEntries = list.getEntries()
+            for (var i = 0; i < perfEntries.length; i++) {
+                console.group('%cThis is a long task', 'color: red')
+                console.log(perfEntries[i])
+                console.groupEnd()
+            }
+        })
+        observer.observe({ entryTypes: ['longtask'] })
+    </script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 24px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-header {
+        background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
+        color: white;
+        padding: 20px 24px;
+        font-weight: 600;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .card-body {
+        padding: 24px;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+
+      .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .info-item:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        font-weight: 600;
+        color: #666;
+        min-width: 120px;
+      }
+
+      .info-value {
+        color: #ff0050;
+        font-weight: 500;
+        word-break: break-all;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+
+      .status-success {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .status-error {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .e2e-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .e2e-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .e2e-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+      }
+
+      .e2e-name {
+        font-weight: 500;
+        flex: 1;
+      }
+
+      .tool-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 24px;
+      }
+
+      .tool-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+      }
+
+      .tool-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .tool-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .tool-body {
+        padding: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #4facfe;
+        box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        margin-right: 12px;
+        margin-bottom: 12px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 0, 80, 0.3);
+      }
+
+      .btn-secondary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+      }
+
+      .icon {
+        font-size: 1.2rem;
+      }
+
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 0 10px;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tool-section {
+          grid-template-columns: 1fr;
+        }
+
+        .card-body {
+          padding: 16px;
+        }
+      }
+
+      #json-editor {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header fade-in">
+        <h1><i class="fab fa-tiktok"></i> TikTok Pixel Demo</h1>
+        <p>Advanced pixel tracking and analytics testing platform</p>
+    </div>
+
+    <div id="app">
+        <!-- Pixel Information Card -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-info-circle icon"></i>
+                Pixel Configuration
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-code icon" style="color: #ff0050"></i>
+                        <span class="info-label">Pixel Code:</span>
+                        <span class="info-value">{{pixelCode}}</span>
+                    </div>
+                    <div class="info-item" v-if="!!env">
+                        <i class="fas fa-server icon" style="color: #4facfe"></i>
+                        <span class="info-label">Environment:</span>
+                        <span class="info-value">{{env}}</span>
+                    </div>
+                    <div class="info-item" v-if="!!userAgent">
+                        <i class="fas fa-browser icon" style="color: #28a745"></i>
+                        <span class="info-label">User Agent:</span>
+                        <span class="info-value">{{userAgent}}</span>
+                    </div>
+                    <div class="info-item" v-if="!!runtimeEnv">
+                        <i class="fas fa-cogs icon" style="color: #ffc107"></i>
+                        <span class="info-label">Runtime ENV:</span>
+                        <span class="info-value">{{runtimeEnv}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Information Card -->
+        <div class="card fade-in" v-if="!!basicVisitorId || proVisitorId">
+            <div class="card-header">
+                <i class="fas fa-user icon"></i>
+                User Information
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-fingerprint icon" style="color: #6f42c1"></i>
+                        <span class="info-label">Visitor ID (Basic):</span>
+                        <span class="info-value">{{basicVisitorId}}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-fingerprint icon" style="color: #e83e8c"></i>
+                        <span class="info-label">Visitor ID (PRO):</span>
+                        <span class="info-value">{{proVisitorId}}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-paint-brush icon" style="color: #fd7e14"></i>
+                        <span class="info-label">Canvas Fingerprint:</span>
+                        <span class="info-value">{{canvasFingerprint}}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-cookie-bite icon" style="color: #20c997"></i>
+                        <span class="info-label">First Party Cookie:</span>
+                        <span class="info-value">{{firstPartyCookie}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Information Card -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-file-alt icon"></i>
+                Page Information
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-tag icon" style="color: #17a2b8"></i>
+                        <span class="info-label">Type:</span>
+                        <span class="info-value">{{pageType}}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-link icon" style="color: #28a745"></i>
+                        <span class="info-label">URL:</span>
+                        <span class="info-value">{{url}}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-external-link-alt icon" style="color: #6c757d"></i>
+                        <span class="info-label">Referrer:</span>
+                        <span class="info-value">{{referrer}}</span>
+                    </div>
+                    <div class="info-item" v-if="!!variationId">
+                        <i class="fas fa-random icon" style="color: #ffc107"></i>
+                        <span class="info-label">Variation ID:</span>
+                        <span class="info-value">{{variationId}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- E2E Test Results Card -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-check-circle icon"></i>
+                E2E Test Results
+            </div>
+            <div class="card-body">
+                <div class="e2e-list">
+                    <div v-for="(item,index) in e2eCaseList" :key="index" class="e2e-item">
+                        <span class="e2e-name">{{item.name}}</span>
+                        <span class="status-badge" :class="item.result ? 'status-success' : 'status-error'">
+                  <i :class="item.result ? 'fas fa-check' : 'fas fa-times'"></i>
+                  {{item.result ? 'PASS' : 'FAIL'}}
+                </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Section -->
+        <div class="tool-section">
+            <!-- Custom Event Tool -->
+            <div class="tool-card fade-in">
+                <div class="tool-header">
+                    <i class="fas fa-bolt icon"></i>
+                    Custom Event Trigger
+                </div>
+                <div class="tool-body">
+                    <div class="form-group">
+                        <label class="form-label">Event Name</label>
+                        <input
+                            v-model="customEvent"
+                            type="text"
+                            placeholder="Enter custom event name"
+                            class="form-input"
+                        />
+                    </div>
+                    <button @click="track(customEvent)" class="btn btn-primary">
+                        <i class="fas fa-play"></i>
+                        Trigger Event
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation Tool -->
+            <div class="tool-card fade-in">
+                <div class="tool-header">
+                    <i class="fas fa-external-link-alt icon"></i>
+                    Navigation & Tracking
+                </div>
+                <div class="tool-body">
+                    <div class="form-group">
+                        <label class="form-label">Destination URL</label>
+                        <input
+                            v-model="destinationURL"
+                            type="text"
+                            placeholder="Enter destination URL"
+                            class="form-input"
+                        />
+                    </div>
+                    <button @click="addToCartAndJump(destinationURL)" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                        Add to Cart & Jump
+                    </button>
+                    <button @click="addToCartAndOpen(destinationURL)" class="btn btn-secondary">
+                        <i class="fas fa-external-link-alt"></i>
+                        Add to Cart & Open New Tab
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="json-editor" style="display: none; width: 100%; height: 400px; margin-top: 24px"></div>
+
+<script>
+    //
+    // export const KeyMap = {
+    //     Pageview: 'pageview',
+    //     AddBilling: 'add_billing',
+    //     AddPaymentInfo: 'add_billing',
+    //     AddToCart: 'on_web_cart',
+    //     AddToWishlist: 'on_web_add_to_wishlist',
+    //     Browse: 'view',
+    //     Checkout: 'on_web_order',
+    //     ClickButton: 'button',
+    //     ClickForm: 'button',
+    //     ClickInConsultationPage: 'button',
+    //     ClickInDownloadPage: 'button',
+    //     ClickToDownload: 'download_start',
+    //     CompletePayment: 'shopping',
+    //     CompleteRegistration: 'on_web_register',
+    //     Consult: 'consult',
+    //     ConsultByPhone: 'consult',
+    //     Contact: 'consult',
+    //     Download: 'download_start',
+    //     InitiateCheckout: 'initiate_order',
+    //     PlaceAnOrder: 'on_web_order',
+    //     Purchase: 'shopping',
+    //     Registration: 'on_web_register',
+    //     Search: 'on_web_search',
+    //     StartCheckout: 'initiate_order',
+    //     SubmitForm: 'form',
+    //     Subscribe: 'on_web_subscribe',
+    //     ViewConsultationPage: 'on_web_detail',
+    //     ViewContent: 'on_web_detail',
+    //     ViewDownloadPage: 'on_web_detail',
+    //     ViewForm: 'on_web_detail',
+    // }
+    //
+</script>
+<script>
+    const env = new URL(location.href).searchParams.get('env') || ''
+    const sdkHost =
+        env === 'test' ? `https://boe-analytics.bytedance.net` : `https://analytics.tiktok.com`
+    const url = new URL(location.href)
+    const useCache = url.searchParams.get('useCache') || ''
+    const partner = url.searchParams.get('partner') || ''
+    const is_onsite = !!url.searchParams.get('is_onsite') || false
+    const pageType = url.searchParams.get('pageType') || 'PLP'
+    const pixelCode = url.searchParams.get('pixel') || 'CV2QMT3C77U0G6IA73BG'
+
+    const e2eCaseList = [
+        {
+            name: 'Referrer Check',
+            code: '["https://www.tiktok.com","https://www.tiktok.com/"].includes(document.referrer)'
+        },
+        {
+            name: 'UTM Source Check',
+            code: '/utm_source=[^&]*/i.test(location.search)'
+        },
+        {
+            name: 'GA Loaded Check (timeout 5s)',
+            code: 'window.dataLayer.some((item) => item.event === "gtm.load")'
+        },
+        {
+            name: 'IAB UserAgent Check',
+            code: 'window.ttq._env.env === "tiktok"'
+        },
+        {
+            name: 'Click_ID Check (ttclid)',
+            code: '/ttclid=[^&]*/i.test(location.search)'
+        }
+    ]
+
+    !(function(w, d, t) {
+        w.TiktokAnalyticsObject = t
+        var ttq = (w[t] = w[t] || [])
+        ;(ttq.methods = [
+            'page',
+            'track',
+            'identify',
+            'instances',
+            'debug',
+            'on',
+            'off',
+            'once',
+            'ready',
+            'alias',
+            'group',
+            'enableCookie',
+            'disableCookie',
+            'holdConsent',
+            'revokeConsent',
+            'grantConsent'
+        ]),
+            (ttq.setAndDefer = function(t, e) {
+                t[e] = function() {
+                    t.push([e].concat(Array.prototype.slice.call(arguments, 0)))
+                }
+            })
+        for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i])
+        ;
+        (ttq.instance = function(t) {
+            for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)
+                ttq.setAndDefer(e, ttq.methods[n])
+            return e
+        }),
+            (ttq.load = function(e, n) {
+                var i = sdkHost + '/i18n/pixel/events.js'
+                ;(ttq._i = ttq._i || {}),
+                    (ttq._i[e] = []),
+                    (ttq._i[e]._u = i),
+                    (ttq._t = ttq._t || {}),
+                    (ttq._t[e] = +new Date()),
+                    (ttq._o = ttq._o || {}),
+                    (ttq._o[e] = n || {}),
+                    (ttq._partner = ttq._partner || partner)
+                var o = document.createElement('script')
+
+                // pixel level partner
+                ttq._i[e]._partner = (n && n.partner) || partner
+                ;(o.type = 'text/javascript'),
+                    (o.async = !0),
+                    (o.src = i + '?sdkid=' + e + '&lib=' + t + (useCache ? `&useCache=${useCache}` : ''))
+                var a = document.getElementsByTagName('script')[0]
+                a.parentNode.insertBefore(o, a)
+            })
+        ttq._is_onsite = is_onsite
+    })(window, document, 'ttq')
+
+    function setEnv(env) {
+        env &&
+        Object.defineProperty(window.ttq, '_env', {
+            get() {
+                return {
+                    env: env,
+                    key: ''
+                }
+            },
+            set(v) {}
+        })
+    }
+
+    function setSelfHost(host, code) {
+        host &&
+        Object.defineProperty(window.ttq, '_self_host_config', {
+            get() {
+                return {
+                    [code]: host
+                }
+            },
+            set(v) {}
+        })
+    }
+
+    function loadPixel(pixel, isBundle, isLegacy) {
+        if (isBundle) {
+            loadBundlePixel(pixel)
+        } else if (isLegacy) {
+            loadPixel2(pixel)
+        } else {
+            loadPixel2X(pixel)
+        }
+    }
+
+    function loadPixel2X(pixel) {
+        ttq.load(pixel)
+        ttq.page()
+        // ttq.page({event_id:123}, {pixel_code : 'CC3I3BJC77U89IK11P5G'} )
+        ttq.track('Pageview')
+        ttq.track('AddToCart', {
+            content_type: 'product',
+            currency: 'USD',
+            value: 1.1,
+            contents: [
+                {
+                    content_id: 31030,
+                    content_category: 'Tickets',
+                    content_name: 'GA',
+                    quantity: 1,
+                    description: 'Event tickets'
+                }
+            ]
+        })
+    }
+
+    function loadBundlePixel(pixel) {
+        const url =
+            `${sdkHost}/i18n/pixel/bundle.js?sdkid=${pixel}&lib=ttq` +
+            (useCache ? `&useCache=${useCache}` : '') +
+            (partner ? `&partner=${partner}` : '')
+        loadSDK(url)
+    }
+
+    function loadPixel2(pixel) {
+        const url =
+            `${sdkHost}/i18n/pixel/sdk.js?sdkid=${pixel}&lib=ttq` +
+            (useCache ? `&useCache=${useCache}` : '') +
+            (partner ? `&partner=${partner}` : '')
+        loadSDK(url)
+    }
+
+    function loadSDK(src) {
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.async = true
+        script.src = src
+        const first = document.getElementsByTagName('script')[0]
+        first.parentNode.insertBefore(script, first)
+    }
+</script>
+
+<script>
+    !(function(f, b, e, v, n, t, s) {
+        if (f.fbq) return
+        n = f.fbq = function() {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        }
+        if (!f._fbq) f._fbq = n
+        n.push = n
+        n.loaded = !0
+        n.version = '2.0'
+        n.queue = []
+        t = b.createElement(e)
+        t.async = !0
+        t.src = v
+        s = b.getElementsByTagName(e)[0]
+        s.parentNode.insertBefore(t, s)
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
+    // Line to enable Manual Only mode.
+    // fbq('set', 'autoConfig', true, '889402761892015');
+    fbq('set', 'autoConfig', true, '2837394306505635')
+    fbq('set', 'autoConfig', true, '1565467421023292')
+    // fbq('init', '889402761892015')
+    fbq('init', '2837394306505635')
+    fbq('init', '1565467421023292')
+    fbq('track', 'PageView')
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-436GH3ZFKQ"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q9P4CBQTW2"></script>
+<script>
+    window.dataLayer = window.dataLayer || []
+
+    function gtag() {
+        dataLayer.push(arguments)
+    }
+
+    gtag('js', new Date())
+
+    gtag('config', 'G-436GH3ZFKQ')
+    gtag('config', 'G-Q9P4CBQTW2')
+</script>
+<script>
+    const CONSENT_MODE = {
+        UNKNOWN: 0,
+        HOLD: 1,
+        REVOKE: 2,
+        GRANT: 3
+    }
+
+    const DEFAULT_PLUGIN_CONFIG = {
+        AdvancedMatching: true,
+        AutoAdvancedMatching: true,
+        AutoConfig: true,
+        Callback: true,
+        CompetitorInsight: true,
+        DiagnosticsConsole: true,
+        EnrichIpv6: true,
+        EnrichIpv6V2: true,
+        EventBuilder: true,
+        HistoryObserver: true,
+        Identify: true,
+        Monitor: {
+            IsMonitorRevamp: true
+        },
+        PageData: true,
+        PangleCookieMatching: true,
+        PerformanceInteraction: false,
+        Shopify: true,
+        WebFL: false
+    }
+
+    const jsonEditorContainer = document.getElementById('json-editor')
+
+    window.myVue = new Vue({
+        el: '#app',
+        data() {
+            return {
+                CONSENT_MODE,
+                pixelCode: pixelCode,
+                env: env,
+                userAgent: url.searchParams.get('userAgent') || '',
+                runtimeEnv: '',
+                variationId: '',
+                basicVisitorId: '',
+                proVisitorId: '',
+                canvasFingerprint: '',
+                firstPartyCookie: '',
+                pageType: pageType,
+                url: location.href,
+                referrer: document.referrer,
+                customEvent: 'CustomEvent',
+                pluginConfig:
+                    url.searchParams.get('pluginConfig') || JSON.stringify(DEFAULT_PLUGIN_CONFIG),
+                isDebugPlugin: !!url.searchParams.get('debugPlugin'),
+                count: parseInt(url.searchParams.get('count') || '0'),
+                app_name: url.searchParams.get('app_name') || '',
+                host: url.searchParams.get('host') || '',
+                isLegacy: url.searchParams.get('isLegacy') || '',
+                isBundle: url.searchParams.get('isBundle') || '',
+                consentMode: parseInt(url.searchParams.get('consentMode') || '0'),
+                destinationURL: `${location.origin}/pixel/pixel-e2e.html?pixel=${pixelCode}&pageType=PDP`,
+                eventType: [
+                    {
+                        enum: '-',
+                        code: 'pageview',
+                        event: 'Pageview'
+                    },
+                    {
+                        enum: 146,
+                        code: 'on_web_detail',
+                        event: 'ViewContent'
+                    },
+                    {
+                        enum: 147,
+                        code: 'on_web_cart',
+                        event: 'AddToCart'
+                    },
+                    {
+                        enum: 148,
+                        code: 'on_web_order',
+                        event: 'PlaceAnOrder'
+                    },
+                    {
+                        enum: 96,
+                        code: 'shopping',
+                        event: 'CompletePayment'
+                    },
+                    {
+                        enum: 145,
+                        code: 'on_web_register',
+                        event: 'CompleteRegistration'
+                    },
+                    {
+                        enum: 266,
+                        code: 'add_billing',
+                        event: 'AddPaymentInfo'
+                    },
+                    {
+                        enum: 267,
+                        code: 'initiate_order',
+                        event: 'InitiateCheckout'
+                    },
+                    {
+                        enum: 268,
+                        code: 'on_web_search',
+                        event: 'Search'
+                    },
+                    {
+                        enum: 5,
+                        code: 'button',
+                        event: 'ClickButton'
+                    },
+                    {
+                        enum: 9,
+                        code: 'download_start',
+                        event: 'Download'
+                    },
+                    {
+                        enum: 97,
+                        code: 'consult',
+                        event: 'Consult'
+                    },
+                    {
+                        enum: 2,
+                        code: 'form',
+                        event: 'SubmitForm'
+                    },
+                    {
+                        enum: 269,
+                        code: 'on_web_add_to_wishlist',
+                        event: 'AddToWishlist'
+                    },
+                    {
+                        enum: 270,
+                        code: 'on_web_subscribe',
+                        event: 'Subscribe'
+                    }
+                ],
+                e2eCaseList: e2eCaseList
+            }
+        },
+        watch: {
+            consentMode() {
+                this.consentHandle()
+            },
+            app_name() {
+                url.searchParams.set('app_name', this.app_name)
+                location.href = url.href
+            },
+            isDebugPlugin() {
+                if (this.isDebugPlugin) {
+                    url.searchParams.set('debugPlugin', '1')
+                    url.searchParams.set('pluginConfig', JSON.stringify(DEFAULT_PLUGIN_CONFIG))
+                } else {
+                    url.searchParams.set('debugPlugin', '')
+                    url.searchParams.set('pluginConfig', '')
+                }
+                location.href = url.href
+            }
+        },
+        methods: {
+            addToCartAndJump(url) {
+                this.track('AddToCart')
+                location.href = url
+            },
+            addToCartAndOpen(url) {
+                this.track('AddToCart')
+                window.open(url)
+            },
+            track(event, properties) {
+                ttq.track(event, properties)
+            },
+            consentHandle() {
+                switch (this.consentMode) {
+                    case this.CONSENT_MODE.UNKNOWN:
+                        break
+                    case this.CONSENT_MODE.HOLD:
+                        ttq.holdConsent()
+                        break
+                    case this.CONSENT_MODE.REVOKE:
+                        ttq.revokeConsent()
+                        break
+                    case this.CONSENT_MODE.GRANT:
+                        ttq.grantConsent()
+                        break
+                }
+            },
+            setJson() {
+                const options = {
+                    mode: 'tree',
+                    onChange: _.debounce(function() {
+                        try {
+                            const updatedJson = editor.get()
+                            const url = new URL(location.href)
+                            url.searchParams.set('pluginConfig', JSON.stringify(updatedJson))
+                            location.href = url.href
+                        } catch (error) {
+                            console.error('Invalid JSON:', error)
+                        }
+                    }, 1000)
+                }
+                const editor = new JSONEditor(jsonEditorContainer, options)
+                editor.set(JSON.parse(this.pluginConfig))
+            },
+            debugPlugin() {
+                const _this = this
+                jsonEditorContainer.style.display = 'block'
+                Object.defineProperty(window.ttq, '_plugins', {
+                    get() {
+                        return JSON.parse(_this.pluginConfig)
+                    },
+                    set(v) {}
+                })
+            },
+            runCase(code) {
+                try {
+                    return eval(code)
+                } catch {
+                    return false
+                }
+            },
+            detectCurrentRuntimeEnv() {
+                const timer = setInterval(() => {
+                    if (window.ttq._env) {
+                        this.runtimeEnv = window.ttq._env.env
+                        this.variationId = window.ttq._variation_id
+                        clearInterval(timer)
+                    }
+                }, 1000)
+            },
+            detectCurrentE2ECaseList(callback) {
+                const timeout5s = setTimeout(() => {
+                    callback()
+                }, 5 * 1000)
+
+                const timer = setInterval(() => {
+                    this.e2eCaseList.forEach((item) => {
+                        item.result = this.runCase(item.code)
+                        return !!item.result
+                    })
+                    this.$forceUpdate()
+                    const e2eAllPass = this.e2eCaseList.every((item) => item.result)
+                    if (e2eAllPass) {
+                        clearTimeout(timeout5s)
+                        clearInterval(timer)
+                        callback()
+                    }
+                }, 1000)
+            },
+            detectFirstPartyCookie() {
+                const getCookieValue = (key) => {
+                    const cookieData = {}
+
+                    document.cookie.split(';').forEach((item) => {
+                        const data = item.split('=')
+                        const key = data[0].trim()
+                        cookieData[key] = data.slice(1).join('=')
+                    })
+                    return cookieData[key] || ''
+                }
+                const getCookieInCommonBrowser = (param) => {
+                    if (document.cookie.length === 0) {
+                        return ''
+                    }
+                    const value = getCookieValue(param)
+                    if (value) {
+                        return unescape(value)
+                    }
+                    return ''
+                }
+                const timer = setInterval(() => {
+                    const ttp = getCookieInCommonBrowser('_ttp')
+                    if (ttp) {
+                        this.firstPartyCookie = ttp
+                        clearInterval(timer)
+                    }
+                }, 1000)
+            }
+        },
+        created() {
+            this.consentHandle()
+            if (this.count) {
+                for (let i = 0; i < this.count; i++) {
+                    loadPixel('PIXEL_MOCK_' + i, this.isBundle, this.isLegacy)
+                }
+            }
+
+            this.detectCurrentRuntimeEnv()
+
+            if (this.app_name === 'tiktok') {
+                window.initTikTokMockJSB()
+            }
+            this.app_name && setEnv(this.app_name)
+            this.host && setSelfHost(this.host, this.pixelCode)
+            loadPixel(this.pixelCode, this.isBundle, this.isLegacy)
+            this.pluginConfig && this.setJson()
+            this.isDebugPlugin && this.debugPlugin()
+
+            this.detectCurrentE2ECaseList(() => {
+                this.track('PixelE2E', { e2eCaseList, event_experiment: 'e2e' })
+            })
+
+            this.detectFirstPartyCookie()
+        }
+    })
+</script>
+<script>
+    console.log('location.href:', location.href)
+    console.log('document.URL:', document.URL)
+    console.log('document.referrer:', document.referrer)
+</script>
+<script>
+    // PRO: https://dashboard.fingerprint.com/workspaces/sub_NcHxg31DyJ3Xle/get-started
+    // Initialize the agent on page load.
+    const proFpPromise = import('https://fpjscdn.net/v3/DQ4YQcDQM18q8Hzbx4YL').then(
+        (FingerprintJS) => FingerprintJS.load()
+    )
+
+    // Get the visitorId when you need it.
+    proFpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+            myVue.$data.proVisitorId = result.visitorId
+        })
+</script>
+<script>
+    // Basic: https://github.com/fingerprintjs/fingerprintjs?tab=readme-ov-file#getting-started
+    // Initialize the agent at application startup.
+    // If you're using an ad blocker or Brave/Firefox, this import will not work.
+    // Please use the NPM package instead: https://t.ly/ORyXk
+    const basicFpPromise = import('https://openfpcdn.io/fingerprintjs/v4').then((FingerprintJS) =>
+        FingerprintJS.load()
+    )
+
+    // Get the visitor identifier when you need it.
+    basicFpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+            myVue.$data.basicVisitorId = result.visitorId
+        })
+</script>
+<script>
+    function getCanvasFingerprint() {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return null
+
+        ctx.textBaseline = 'top'
+        ctx.font = '14px \'Arial\''
+        ctx.fillStyle = '#f60'
+        ctx.fillRect(125, 1, 62, 20)
+        ctx.fillStyle = '#069'
+        ctx.fillText('fingerprint', 2, 15)
+        return canvas.toDataURL()
+    }
+
+    myVue.$data.canvasFingerprint = CryptoJS.SHA256(getCanvasFingerprint()).toString()
+</script>
+<script></script>
+<script>
+    const metaPixelCode =
+        new URL(location.href).searchParams.get('meta_pixel') || '889402761892015'
+    !(function(f, b, e, v, n, t, s) {
+        if (f.fbq) return
+        n = f.fbq = function() {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        }
+        if (!f._fbq) f._fbq = n
+        n.push = n
+        n.loaded = !0
+        n.version = '2.0'
+        n.queue = []
+        t = b.createElement(e)
+        t.async = !0
+        t.src = v
+        s = b.getElementsByTagName(e)[0]
+        s.parentNode.insertBefore(t, s)
+    })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
+    fbq('init', metaPixelCode)
+    fbq('track', 'PageView')
+</script>
+<!-- Google tag (gtag.js) -->
+<script>
+    const gaPixelCode = new URL(location.href).searchParams.get('ga_pixel') || 'G-W501CH8367'
+
+    function loadGATag(code) {
+        const script = document.createElement('script')
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${code}`
+        script.async = true
+        document.head.appendChild(script)
+        script.onload = function() {
+            window.dataLayer = window.dataLayer || []
+
+            function gtag() {
+                dataLayer.push(arguments)
+            }
+
+            gtag('js', new Date())
+            gtag('config', code)
+        }
+    }
+
+    loadGATag(gaPixelCode)
+</script>
+</body>
+</html>
