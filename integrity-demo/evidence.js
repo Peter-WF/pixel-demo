@@ -18,7 +18,7 @@
     'environment.network': { collection: ['AL-PUBLIC'], logic: 'N/A', detail: 'AppLovin publicly discloses collection of network connection information and IP-related data.' },
     'environment.locale': { collection: ['AL-PUBLIC'], logic: 'N/A', detail: 'AppLovin publicly discloses locale and timezone-related information.' },
     'environment.page_context': { collection: ['AL-DIRECT-PIXEL'], logic: 'N/A', detail: 'Directly observed Pixel fields include document location/referrer/title, topWindow context and inIframe.' },
-    'rendering.canvas': { collection: ['UNKNOWN'], logic: 'OUR-HEURISTIC', detail: 'This Canvas rendering hash is our implementation. We have not directly confirmed this exact collection in AppLovin.' },
+    'rendering.canvas': { collection: ['AL-DIRECT-BS'], logic: 'OUR-HEURISTIC', detail: 'AppLovin bs.js contains Canvas-related collection logic, including 2D canvas access, drawing and readback-style paths. This directly confirms Canvas-related signal collection code exists in bs.js. We have not yet proven that the Canvas output is serialized into /v1/s, nor that AppLovin uses our demo hash or uses Canvas as a persistent identity.' },
     'rendering.webgl': { collection: ['UNKNOWN'], logic: 'OUR-HEURISTIC', detail: 'This WebGL collector is our implementation. Exact AppLovin WebGL fields are not yet directly confirmed.' },
     'environment.storage': { collection: ['AL-PUBLIC'], logic: 'N/A', detail: 'Storage/memory-related device information is publicly disclosed by AppLovin.' },
     'environment.audio': { collection: ['AL-PUBLIC'], logic: 'N/A', detail: 'Audio/video capability categories are publicly disclosed by AppLovin.' },
@@ -34,7 +34,7 @@
       collectionIntro: 'How strong is the evidence that AppLovin collects the underlying signal?',
       values: {
         'AL-DIRECT-PIXEL': 'Exact raw signal / field directly observed in AppLovin Pixel (/v1/pixel) traffic.',
-        'AL-DIRECT-BS': 'Exact raw signal / field directly confirmed in AppLovin bs.js or re.applovin.com/v1/s.',
+        'AL-DIRECT-BS': 'Exact signal collection code directly confirmed in AppLovin bs.js, or exact signal/field confirmed from re.applovin.com/v1/s. This does not automatically prove how the signal is used server-side.',
         'AL-PUBLIC': 'Signal category publicly disclosed by AppLovin, but the exact field / current implementation is not directly confirmed.',
         'UNKNOWN': 'No sufficient evidence yet that AppLovin collects this exact signal.',
         'AL-DIRECT': 'Exact detector / rule directly confirmed in AppLovin implementation evidence.',
@@ -48,7 +48,7 @@
       collectionIntro: '表示我们对“AppLovin 是否采集了这个底层 Signal”掌握了多强的证据。',
       values: {
         'AL-DIRECT-PIXEL': '已在 AppLovin Pixel（/v1/pixel）的真实 Payload 中直接观察到这个 exact raw signal / field。',
-        'AL-DIRECT-BS': '已从 AppLovin bs.js 或 re.applovin.com/v1/s 中直接确认这个 exact raw signal / field。',
+        'AL-DIRECT-BS': '已在 AppLovin bs.js 中直接确认对应 Signal 的采集代码，或从 re.applovin.com/v1/s 中直接确认 exact signal / field。注意：这并不自动证明服务端最终如何使用这个 Signal。',
         'AL-PUBLIC': 'AppLovin 官方文档或隐私披露确认会采集这一类 Signal，但 exact field / 当前实现没有被直接确认。',
         'UNKNOWN': '目前没有足够证据证明 AppLovin 会采集这个 exact signal。',
         'AL-DIRECT': '已经从 AppLovin 实现证据中直接确认这个 exact detector / rule。',
@@ -65,7 +65,7 @@
 
   function annotate(report) {
     if (!report || !Array.isArray(report.signals)) return report;
-    report.evidenceSchemaVersion = '2.2';
+    report.evidenceSchemaVersion = '2.3';
     report.appLovinEvidenceModel = {
       collectionEvidence: {
         'AL-DIRECT-PIXEL': DEFINITIONS.en.values['AL-DIRECT-PIXEL'],
@@ -111,13 +111,8 @@
     return `<span class="bi-evidence-badge ${badgeClass(value)}" data-evidence-value="${value}">${value}</span>`;
   }
 
-  function isZh() {
-    return (document.documentElement.lang || '').toLowerCase().startsWith('zh');
-  }
-
-  function langDef() {
-    return isZh() ? DEFINITIONS.zh : DEFINITIONS.en;
-  }
+  function isZh() { return (document.documentElement.lang || '').toLowerCase().startsWith('zh'); }
+  function langDef() { return isZh() ? DEFINITIONS.zh : DEFINITIONS.en; }
 
   function enhanceTable() {
     const table = document.querySelector('.tablewrap table');
@@ -160,9 +155,7 @@
     if (json) json.textContent = JSON.stringify(report, null, 2);
   }
 
-  function scheduleEnhance() {
-    requestAnimationFrame(() => requestAnimationFrame(enhanceTable));
-  }
+  function scheduleEnhance() { requestAnimationFrame(() => requestAnimationFrame(enhanceTable)); }
 
   const style = document.createElement('style');
   style.textContent = `
@@ -180,12 +173,7 @@
     .bi-header-help{cursor:help;white-space:nowrap}
     .bi-help-dot{display:inline-grid;place-items:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:#eef2ff;color:#4f46e5;font-size:9px;font-weight:900;text-transform:none;vertical-align:middle}
     .bi-tooltip{position:fixed;z-index:99999;display:none;max-width:420px;padding:11px 12px;background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.22);font-size:11px;line-height:1.5;pointer-events:none}
-    .bi-tooltip.show{display:block}
-    .bi-tooltip-title{font-size:12px;font-weight:800;margin-bottom:5px}
-    .bi-tooltip-intro{color:#d1d5db;margin-bottom:9px}
-    .bi-tooltip-row{display:grid;grid-template-columns:max-content 1fr;gap:8px;align-items:start;margin-top:7px}
-    .bi-tooltip-row .bi-evidence-badge{cursor:default;margin:0}
-    .bi-tooltip-desc{color:#e5e7eb}
+    .bi-tooltip.show{display:block}.bi-tooltip-title{font-size:12px;font-weight:800;margin-bottom:5px}.bi-tooltip-intro{color:#d1d5db;margin-bottom:9px}.bi-tooltip-row{display:grid;grid-template-columns:max-content 1fr;gap:8px;align-items:start;margin-top:7px}.bi-tooltip-row .bi-evidence-badge{cursor:default;margin:0}.bi-tooltip-desc{color:#e5e7eb}
   `;
   document.head.appendChild(style);
 
@@ -194,38 +182,31 @@
   document.body.appendChild(tooltip);
 
   function positionTooltip(target) {
-    const r = target.getBoundingClientRect();
-    const pad = 10;
+    const r = target.getBoundingClientRect(), pad = 10;
     const width = Math.min(420, window.innerWidth - pad * 2);
     tooltip.style.maxWidth = width + 'px';
     tooltip.style.left = Math.min(Math.max(pad, r.left), window.innerWidth - width - pad) + 'px';
     tooltip.style.top = (r.bottom + 8) + 'px';
     requestAnimationFrame(() => {
       const tr = tooltip.getBoundingClientRect();
-      if (tr.bottom > window.innerHeight - pad) {
-        tooltip.style.top = Math.max(pad, r.top - tr.height - 8) + 'px';
-      }
+      if (tr.bottom > window.innerHeight - pad) tooltip.style.top = Math.max(pad, r.top - tr.height - 8) + 'px';
     });
   }
 
   function showValueTooltip(target, value) {
     const d = langDef();
     tooltip.innerHTML = `<div class="bi-tooltip-row"><span class="bi-evidence-badge ${badgeClass(value)}">${value}</span><div class="bi-tooltip-desc">${d.values[value] || value}</div></div>`;
-    tooltip.classList.add('show');
-    positionTooltip(target);
+    tooltip.classList.add('show'); positionTooltip(target);
   }
 
   function showCollectionTooltip(target) {
     const d = langDef();
     const values = ['AL-DIRECT-PIXEL','AL-DIRECT-BS','AL-PUBLIC','UNKNOWN'];
     tooltip.innerHTML = `<div class="bi-tooltip-title">${d.collectionTitle}</div><div class="bi-tooltip-intro">${d.collectionIntro}</div>${values.map(v => `<div class="bi-tooltip-row"><span class="bi-evidence-badge ${badgeClass(v)}">${v}</span><div class="bi-tooltip-desc">${d.values[v]}</div></div>`).join('')}`;
-    tooltip.classList.add('show');
-    positionTooltip(target);
+    tooltip.classList.add('show'); positionTooltip(target);
   }
 
-  function hideTooltip() {
-    tooltip.classList.remove('show');
-  }
+  function hideTooltip() { tooltip.classList.remove('show'); }
 
   document.addEventListener('pointerover', event => {
     const badgeEl = event.target.closest?.('[data-evidence-value]');
@@ -233,7 +214,6 @@
     const headerEl = event.target.closest?.('[data-evidence-header="collection"]');
     if (headerEl) showCollectionTooltip(headerEl);
   });
-
   document.addEventListener('pointerout', event => {
     const from = event.target.closest?.('[data-evidence-value],[data-evidence-header="collection"]');
     if (!from) return;
@@ -244,27 +224,12 @@
   window.addEventListener('scroll', hideTooltip, true);
   window.addEventListener('resize', hideTooltip);
 
-  window.addEventListener('browser-integrity:report', event => {
-    annotate(event.detail);
-    scheduleEnhance();
-  }, { capture: true });
-
-  if (window.__browserIntegrityLastReport) {
-    annotate(window.__browserIntegrityLastReport);
-    scheduleEnhance();
-  }
-
+  window.addEventListener('browser-integrity:report', event => { annotate(event.detail); scheduleEnhance(); }, { capture: true });
+  if (window.__browserIntegrityLastReport) { annotate(window.__browserIntegrityLastReport); scheduleEnhance(); }
   document.addEventListener('click', event => {
     const id = event.target && event.target.id;
-    if (id === 'biZh' || id === 'biEn') {
-      hideTooltip();
-      scheduleEnhance();
-    }
+    if (id === 'biZh' || id === 'biEn') { hideTooltip(); scheduleEnhance(); }
   });
-
-  // The old full-page evidence explanation is intentionally removed from the main layout.
-  // i18n.js creates it after this script, so remove it once all synchronous scripts have run.
-  setTimeout(() => document.getElementById('biEvidence')?.remove(), 0);
 
   window.AppLovinEvidence = Object.freeze({ annotate, enhanceTable: scheduleEnhance, metaFor });
 })();
