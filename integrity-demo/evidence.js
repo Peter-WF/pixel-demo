@@ -28,25 +28,56 @@
   const DEFAULT_RULE = { collection: ['UNKNOWN'], logic: 'OUR-HEURISTIC', detail: 'No direct AppLovin implementation evidence has been assigned to this detector yet.' };
   const DEFAULT_INFO = { collection: ['UNKNOWN'], logic: 'N/A', detail: 'No direct AppLovin collection evidence has been assigned to this informational signal yet.' };
 
+  const DEFINITIONS = {
+    en: {
+      collectionTitle: 'Collection Evidence',
+      collectionIntro: 'How strong is the evidence that AppLovin collects the underlying signal?',
+      values: {
+        'AL-DIRECT-PIXEL': 'Exact raw signal / field directly observed in AppLovin Pixel (/v1/pixel) traffic.',
+        'AL-DIRECT-BS': 'Exact raw signal / field directly confirmed in AppLovin bs.js or re.applovin.com/v1/s.',
+        'AL-PUBLIC': 'Signal category publicly disclosed by AppLovin, but the exact field / current implementation is not directly confirmed.',
+        'UNKNOWN': 'No sufficient evidence yet that AppLovin collects this exact signal.',
+        'AL-DIRECT': 'Exact detector / rule directly confirmed in AppLovin implementation evidence.',
+        'AL-INFERRED': 'This class of detector is strongly inferred, but its exact rule or threshold is not confirmed.',
+        'OUR-HEURISTIC': 'Detector implemented by this demo. It is not claimed to be AppLovin’s exact logic.',
+        'N/A': 'Informational / raw signal row; no detector rule is applied.'
+      }
+    },
+    zh: {
+      collectionTitle: '采集证据',
+      collectionIntro: '表示我们对“AppLovin 是否采集了这个底层 Signal”掌握了多强的证据。',
+      values: {
+        'AL-DIRECT-PIXEL': '已在 AppLovin Pixel（/v1/pixel）的真实 Payload 中直接观察到这个 exact raw signal / field。',
+        'AL-DIRECT-BS': '已从 AppLovin bs.js 或 re.applovin.com/v1/s 中直接确认这个 exact raw signal / field。',
+        'AL-PUBLIC': 'AppLovin 官方文档或隐私披露确认会采集这一类 Signal，但 exact field / 当前实现没有被直接确认。',
+        'UNKNOWN': '目前没有足够证据证明 AppLovin 会采集这个 exact signal。',
+        'AL-DIRECT': '已经从 AppLovin 实现证据中直接确认这个 exact detector / rule。',
+        'AL-INFERRED': '有较强证据推断 AppLovin 会做这一类检测，但具体规则或阈值没有被确认。',
+        'OUR-HEURISTIC': '这是本 Demo 自己实现的检测规则，不代表 AppLovin 当前使用相同逻辑。',
+        'N/A': '这一行只是原始 Signal / 环境信息展示，没有应用具体检测规则。'
+      }
+    }
+  };
+
   function metaFor(signal) {
     return MAP[signal.id] || (signal.category === 'environment' ? DEFAULT_INFO : DEFAULT_RULE);
   }
 
   function annotate(report) {
     if (!report || !Array.isArray(report.signals)) return report;
-    report.evidenceSchemaVersion = '2.1';
+    report.evidenceSchemaVersion = '2.2';
     report.appLovinEvidenceModel = {
       collectionEvidence: {
-        'AL-DIRECT-PIXEL': 'Exact raw signal/field directly observed in AppLovin Pixel (/v1/pixel) traffic.',
-        'AL-DIRECT-BS': 'Exact raw signal/field directly confirmed in AppLovin bs.js or re.applovin.com/v1/s.',
-        'AL-PUBLIC': 'Signal category publicly disclosed by AppLovin, but exact implementation/field not directly confirmed.',
-        'UNKNOWN': 'No sufficient AppLovin collection evidence yet.'
+        'AL-DIRECT-PIXEL': DEFINITIONS.en.values['AL-DIRECT-PIXEL'],
+        'AL-DIRECT-BS': DEFINITIONS.en.values['AL-DIRECT-BS'],
+        'AL-PUBLIC': DEFINITIONS.en.values['AL-PUBLIC'],
+        'UNKNOWN': DEFINITIONS.en.values.UNKNOWN
       },
       detectionLogic: {
-        'AL-DIRECT': 'Exact detector/rule directly confirmed in AppLovin implementation.',
-        'AL-INFERRED': 'Detector class strongly inferred from evidence, but exact rule/threshold is not confirmed.',
-        'OUR-HEURISTIC': 'Detector/rule implemented by this demo, not claimed to be AppLovin logic.',
-        'N/A': 'Informational/raw signal; no detector rule is applied.'
+        'AL-DIRECT': DEFINITIONS.en.values['AL-DIRECT'],
+        'AL-INFERRED': DEFINITIONS.en.values['AL-INFERRED'],
+        'OUR-HEURISTIC': DEFINITIONS.en.values['OUR-HEURISTIC'],
+        'N/A': DEFINITIONS.en.values['N/A']
       }
     };
     for (const signal of report.signals) {
@@ -77,11 +108,15 @@
   }
 
   function badge(value) {
-    return `<span class="bi-evidence-badge ${badgeClass(value)}">${value}</span>`;
+    return `<span class="bi-evidence-badge ${badgeClass(value)}" data-evidence-value="${value}">${value}</span>`;
   }
 
   function isZh() {
     return (document.documentElement.lang || '').toLowerCase().startsWith('zh');
+  }
+
+  function langDef() {
+    return isZh() ? DEFINITIONS.zh : DEFINITIONS.en;
   }
 
   function enhanceTable() {
@@ -95,7 +130,9 @@
       const labels = isZh()
         ? ['状态','检测项','分类','风险等级','权重','置信度','采集证据','检测逻辑']
         : ['Status','Detector','Category','Severity','Weight','Confidence','Collection Evidence','Detection Logic'];
-      head.innerHTML = labels.map(x => `<th>${x}</th>`).join('');
+      head.innerHTML = labels.map((x, i) => i === 6
+        ? `<th class="bi-header-help" data-evidence-header="collection">${x}<span class="bi-help-dot">?</span></th>`
+        : `<th>${x}</th>`).join('');
     }
 
     const byId = new Map(report.signals.map(s => [s.id, s]));
@@ -106,12 +143,8 @@
       const meta = signal.appLovinMapping;
       while (row.children.length < 8) row.appendChild(document.createElement('td'));
       while (row.children.length > 8) row.removeChild(row.lastElementChild);
-      const collectionCell = row.children[6];
-      const logicCell = row.children[7];
-      collectionCell.innerHTML = meta.collectionEvidence.map(badge).join(' ');
-      collectionCell.title = meta.evidenceDetail || '';
-      logicCell.innerHTML = badge(meta.detectionLogic);
-      logicCell.title = meta.evidenceDetail || '';
+      row.children[6].innerHTML = meta.collectionEvidence.map(badge).join(' ');
+      row.children[7].innerHTML = badge(meta.detectionLogic);
     });
 
     const flagged = report.signals.filter(x => x.flagged).sort((a,b) => b.weight - a.weight);
@@ -120,10 +153,7 @@
       if (!signal) return;
       const meta = signal.appLovinMapping;
       const tag = node.querySelector('.maptag');
-      if (tag) {
-        tag.innerHTML = `${meta.collectionEvidence.map(badge).join(' ')} ${badge(meta.detectionLogic)}`;
-        tag.title = meta.evidenceDetail || '';
-      }
+      if (tag) tag.innerHTML = `${meta.collectionEvidence.map(badge).join(' ')} ${badge(meta.detectionLogic)}`;
     });
 
     const json = document.getElementById('json');
@@ -136,7 +166,7 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .bi-evidence-badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap;margin:1px 3px 1px 0;border:1px solid transparent;line-height:1.35}
+    .bi-evidence-badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap;margin:1px 3px 1px 0;border:1px solid transparent;line-height:1.35;cursor:help}
     .bi-ev-pixel{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
     .bi-ev-bs{background:#ecfeff;color:#0e7490;border-color:#a5f3fc}
     .bi-ev-public{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
@@ -147,11 +177,73 @@
     .bi-logic-na{background:#f8fafc;color:#64748b;border-color:#e2e8f0}
     #rows td:nth-child(7),#rows td:nth-child(8){min-width:145px}
     .maptag .bi-evidence-badge{font-size:8px;padding:2px 5px;margin-top:3px}
+    .bi-header-help{cursor:help;white-space:nowrap}
+    .bi-help-dot{display:inline-grid;place-items:center;width:14px;height:14px;margin-left:5px;border-radius:50%;background:#eef2ff;color:#4f46e5;font-size:9px;font-weight:900;text-transform:none;vertical-align:middle}
+    .bi-tooltip{position:fixed;z-index:99999;display:none;max-width:420px;padding:11px 12px;background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.22);font-size:11px;line-height:1.5;pointer-events:none}
+    .bi-tooltip.show{display:block}
+    .bi-tooltip-title{font-size:12px;font-weight:800;margin-bottom:5px}
+    .bi-tooltip-intro{color:#d1d5db;margin-bottom:9px}
+    .bi-tooltip-row{display:grid;grid-template-columns:max-content 1fr;gap:8px;align-items:start;margin-top:7px}
+    .bi-tooltip-row .bi-evidence-badge{cursor:default;margin:0}
+    .bi-tooltip-desc{color:#e5e7eb}
   `;
   document.head.appendChild(style);
 
-  // Annotate synchronously when the collector emits its report. The page's render()
-  // then receives the already-annotated object. Render badges once after that render.
+  const tooltip = document.createElement('div');
+  tooltip.className = 'bi-tooltip';
+  document.body.appendChild(tooltip);
+
+  function positionTooltip(target) {
+    const r = target.getBoundingClientRect();
+    const pad = 10;
+    const width = Math.min(420, window.innerWidth - pad * 2);
+    tooltip.style.maxWidth = width + 'px';
+    tooltip.style.left = Math.min(Math.max(pad, r.left), window.innerWidth - width - pad) + 'px';
+    tooltip.style.top = (r.bottom + 8) + 'px';
+    requestAnimationFrame(() => {
+      const tr = tooltip.getBoundingClientRect();
+      if (tr.bottom > window.innerHeight - pad) {
+        tooltip.style.top = Math.max(pad, r.top - tr.height - 8) + 'px';
+      }
+    });
+  }
+
+  function showValueTooltip(target, value) {
+    const d = langDef();
+    tooltip.innerHTML = `<div class="bi-tooltip-row"><span class="bi-evidence-badge ${badgeClass(value)}">${value}</span><div class="bi-tooltip-desc">${d.values[value] || value}</div></div>`;
+    tooltip.classList.add('show');
+    positionTooltip(target);
+  }
+
+  function showCollectionTooltip(target) {
+    const d = langDef();
+    const values = ['AL-DIRECT-PIXEL','AL-DIRECT-BS','AL-PUBLIC','UNKNOWN'];
+    tooltip.innerHTML = `<div class="bi-tooltip-title">${d.collectionTitle}</div><div class="bi-tooltip-intro">${d.collectionIntro}</div>${values.map(v => `<div class="bi-tooltip-row"><span class="bi-evidence-badge ${badgeClass(v)}">${v}</span><div class="bi-tooltip-desc">${d.values[v]}</div></div>`).join('')}`;
+    tooltip.classList.add('show');
+    positionTooltip(target);
+  }
+
+  function hideTooltip() {
+    tooltip.classList.remove('show');
+  }
+
+  document.addEventListener('pointerover', event => {
+    const badgeEl = event.target.closest?.('[data-evidence-value]');
+    if (badgeEl) return showValueTooltip(badgeEl, badgeEl.dataset.evidenceValue);
+    const headerEl = event.target.closest?.('[data-evidence-header="collection"]');
+    if (headerEl) showCollectionTooltip(headerEl);
+  });
+
+  document.addEventListener('pointerout', event => {
+    const from = event.target.closest?.('[data-evidence-value],[data-evidence-header="collection"]');
+    if (!from) return;
+    const to = event.relatedTarget?.closest?.('[data-evidence-value],[data-evidence-header="collection"]');
+    if (to === from) return;
+    hideTooltip();
+  });
+  window.addEventListener('scroll', hideTooltip, true);
+  window.addEventListener('resize', hideTooltip);
+
   window.addEventListener('browser-integrity:report', event => {
     annotate(event.detail);
     scheduleEnhance();
@@ -162,13 +254,17 @@
     scheduleEnhance();
   }
 
-  // Language buttons are created later by i18n.js. Use delegated clicks so the table
-  // header can be refreshed after language changes, without observing/mutating the DOM continuously.
   document.addEventListener('click', event => {
     const id = event.target && event.target.id;
-    if (id === 'biZh' || id === 'biEn') scheduleEnhance();
+    if (id === 'biZh' || id === 'biEn') {
+      hideTooltip();
+      scheduleEnhance();
+    }
   });
 
-  // Expose a small explicit API for future UI updates. No MutationObserver is used.
+  // The old full-page evidence explanation is intentionally removed from the main layout.
+  // i18n.js creates it after this script, so remove it once all synchronous scripts have run.
+  setTimeout(() => document.getElementById('biEvidence')?.remove(), 0);
+
   window.AppLovinEvidence = Object.freeze({ annotate, enhanceTable: scheduleEnhance, metaFor });
 })();
