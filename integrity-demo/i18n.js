@@ -91,7 +91,14 @@
   document.head.appendChild(style);
 
   const actions=document.querySelector('.actions');
-  if(actions&&!document.getElementById('biLang')){const s=document.createElement('div');s.className='bi-lang';s.id='biLang';s.innerHTML='<button id="biZh">中文</button><button id="biEn">EN</button>';actions.insertBefore(s,actions.firstChild);document.getElementById('biZh').onclick=()=>{lang='zh';apply()};document.getElementById('biEn').onclick=()=>{lang='en';apply()};}
+  if(actions&&!document.getElementById('biLang')){
+    const s=document.createElement('div');
+    s.className='bi-lang';s.id='biLang';
+    s.innerHTML='<button id="biZh">中文</button><button id="biEn">EN</button>';
+    actions.insertBefore(s,actions.firstChild);
+    document.getElementById('biZh').onclick=()=>{lang='zh';apply()};
+    document.getElementById('biEn').onclick=()=>{lang='en';apply()};
+  }
   const status=document.getElementById('status');
   if(status&&!document.getElementById('biHowto')){const b=document.createElement('div');b.className='card bi-howto';b.id='biHowto';status.parentNode.insertBefore(b,status)}
   if(status&&!document.getElementById('biEvidence')){const b=document.createElement('div');b.className='card bi-evidence';b.id='biEvidence';status.parentNode.insertBefore(b,status)}
@@ -103,10 +110,43 @@
   function translateTitle(x){return lang==='zh'?(titles[x]||x):(reverseTitles[x]||x)}
   function translateCat(x){const s=(x||'').trim().toLowerCase();return lang==='zh'?(cats[s]||x):(reverseCats[x]||x)}
 
-  function apply(){if(applying)return;applying=true;const d=T[lang];document.documentElement.lang=lang==='zh'?'zh-CN':'en';set('.header h1',d.title);set('.header .sub',d.sub);const shot=document.getElementById('shot'),copy=document.getElementById('copy'),run=document.getElementById('run');if(shot)shot.textContent=document.body.classList.contains('shot')?d.exitShot:d.shot;if(copy&&!/Copied|已复制/.test(copy.textContent))copy.textContent=d.copy;if(run&&!/Scanning|检测中/.test(run.textContent))run.textContent=d.run;document.getElementById('biZh')?.classList.toggle('active',lang==='zh');document.getElementById('biEn')?.classList.toggle('active',lang==='en');renderGuide();renderEvidence();
-    const summaryCard=document.getElementById('flags')?.closest('.card');if(summaryCard){const st=summaryCard.querySelector('.section-title');if(st)st.textContent=d.summary;const ls=summaryCard.querySelectorAll('.label');[d.flags,d.total,d.max,d.weight].forEach((v,i)=>{if(ls[i])ls[i].textContent=v})}
-    const env=document.getElementById('env')?.closest('.card');if(env?.querySelector('.section-title'))env.querySelector('.section-title').textContent=d.env;const sus=document.getElementById('suspicious')?.closest('.card');if(sus?.querySelector('.section-title'))sus.querySelector('.section-title').textContent=d.suspicious;const quick=document.getElementById('quick')?.closest('.card');if(quick?.querySelector('.section-title'))quick.querySelector('.section-title').textContent=d.quick;const all=document.getElementById('rows')?.closest('.card');if(all?.querySelector('.section-title'))all.querySelector('.section-title').textContent=d.all;const rs=document.querySelector('details summary');if(rs)rs.textContent=d.raw;const f=document.querySelector('.footer');if(f)f.textContent=d.footer;
-    document.querySelectorAll('.sig-title').forEach(e=>e.textContent=translateTitle(e.textContent));document.querySelectorAll('#rows td:nth-child(2) strong').forEach(e=>e.textContent=translateTitle(e.textContent));document.querySelectorAll('.catname').forEach(e=>e.textContent=translateCat(e.textContent));document.querySelectorAll('.pill').forEach(e=>{const flag=e.classList.contains('flag');e.textContent=lang==='zh'?(flag?'异常':'正常'):(flag?'FLAG':'OK')});document.querySelectorAll('.empty').forEach(e=>{if(/No suspicious|未检测到明显/.test(e.textContent))e.textContent=d.noSuspicious;else if(/Waiting for scan|等待检测/.test(e.textContent))e.textContent=d.waiting});applying=false}
+  function apply(){
+    if(applying)return;
+    applying=true;
+    const d=T[lang];
+    document.documentElement.lang=lang==='zh'?'zh-CN':'en';
+    set('.header h1',d.title);set('.header .sub',d.sub);
+    const shot=document.getElementById('shot'),copy=document.getElementById('copy'),run=document.getElementById('run');
+    if(shot)shot.textContent=document.body.classList.contains('shot')?d.exitShot:d.shot;
+    if(copy&&!/Copied|已复制/.test(copy.textContent))copy.textContent=d.copy;
+    if(run&&!/Scanning|检测中/.test(run.textContent))run.textContent=d.run;
+    document.getElementById('biZh')?.classList.toggle('active',lang==='zh');
+    document.getElementById('biEn')?.classList.toggle('active',lang==='en');
+    renderGuide();renderEvidence();
+    const summaryCard=document.getElementById('flags')?.closest('.card');
+    if(summaryCard){const st=summaryCard.querySelector('.section-title');if(st)st.textContent=d.summary;const ls=summaryCard.querySelectorAll('.label');[d.flags,d.total,d.max,d.weight].forEach((v,i)=>{if(ls[i])ls[i].textContent=v})}
+    const env=document.getElementById('env')?.closest('.card');if(env?.querySelector('.section-title'))env.querySelector('.section-title').textContent=d.env;
+    const sus=document.getElementById('suspicious')?.closest('.card');if(sus?.querySelector('.section-title'))sus.querySelector('.section-title').textContent=d.suspicious;
+    const quick=document.getElementById('quick')?.closest('.card');if(quick?.querySelector('.section-title'))quick.querySelector('.section-title').textContent=d.quick;
+    const all=document.getElementById('rows')?.closest('.card');if(all?.querySelector('.section-title'))all.querySelector('.section-title').textContent=d.all;
+    const rs=document.querySelector('details summary');if(rs)rs.textContent=d.raw;
+    const f=document.querySelector('.footer');if(f)f.textContent=d.footer;
+    document.querySelectorAll('.sig-title').forEach(e=>e.textContent=translateTitle(e.textContent));
+    document.querySelectorAll('#rows td:nth-child(2) strong').forEach(e=>e.textContent=translateTitle(e.textContent));
+    document.querySelectorAll('.catname').forEach(e=>e.textContent=translateCat(e.textContent));
+    document.querySelectorAll('.pill').forEach(e=>{const flag=e.classList.contains('flag');e.textContent=lang==='zh'?(flag?'异常':'正常'):(flag?'FLAG':'OK')});
+    document.querySelectorAll('.empty').forEach(e=>{if(/No suspicious|未检测到明显/.test(e.textContent))e.textContent=d.noSuspicious;else if(/Waiting for scan|等待检测/.test(e.textContent))e.textContent=d.waiting});
+    applying=false;
+  }
 
-  let timer;const obs=new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(apply,30)});obs.observe(document.body,{childList:true,subtree:true,characterData:true});apply();
+  // Do not observe the whole DOM. The old MutationObserver caused a self-triggering
+  // render loop: apply() mutated DOM -> observer fired -> apply() mutated DOM again.
+  // That made DevTools selections unstable and looked like the page was refreshing.
+  const applyAfterRender=()=>requestAnimationFrame(()=>apply());
+  window.addEventListener('browser-integrity:report',applyAfterRender);
+  document.getElementById('shot')?.addEventListener('click',()=>setTimeout(apply,0));
+  document.getElementById('copy')?.addEventListener('click',()=>setTimeout(apply,1150));
+  document.getElementById('run')?.addEventListener('click',()=>setTimeout(apply,0));
+
+  apply();
 })();
