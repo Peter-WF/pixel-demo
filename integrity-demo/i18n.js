@@ -17,11 +17,19 @@
         ['STEP 4', 'Screenshot or export JSON', 'Use Screenshot Mode for a clean comparison, or Copy JSON for detector-level analysis.']
       ],
       note: 'Important: FLAG means suspicious evidence was observed; it does not mean the visitor is definitely cheating. For accuracy testing, compare normal browsers and known automation / spoofing environments using the same collector version.',
+      evidenceTitle: 'AppLovin Evidence Level — what the labels mean',
+      evidenceIntro: 'These labels describe how strong our evidence is about AppLovin’s implementation. They do NOT describe fraud severity and they do NOT mean every detector shown here is used by AppLovin.',
+      evidence: [
+        ['AL-DIRECT', 'Directly confirmed', 'The exact signal / field has been confirmed from the current AppLovin JavaScript or an observable AppLovin network payload. Use this label only when there is direct implementation evidence.'],
+        ['AL-PUBLIC', 'Publicly confirmed category', 'AppLovin public documentation, privacy disclosures, or observable Pixel traffic confirms that this type of raw signal/category is collected. The exact detector rule or threshold is NOT confirmed.'],
+        ['AL-ANALOG', 'Our analogous detector', 'This is our own industry-style Integrity / Anti-Fraud heuristic designed for a similar goal. We do not currently have evidence that AppLovin uses this exact detector.']
+      ],
+      evidenceFoot: 'Legacy note: the earlier label AL-CONFIRMED has been renamed to AL-PUBLIC because “confirmed” could be misread as confirmation of the exact detection rule. At the moment, most detector rules in this demo are AL-ANALOG; AL-DIRECT should only appear after we verify an exact AppLovin signal/field.',
       shot: 'Screenshot Mode', exitShot: 'Exit Screenshot Mode', copy: 'Copy JSON', copied: 'Copied', run: 'Run Scan', scanning: 'Scanning…',
       summary: 'Integrity Summary', flags: 'Flagged signals', total: 'Total signals', max: 'Max severity', weight: 'Heuristic weight', env: 'Runtime Environment', suspicious: 'Suspicious Signals', quick: 'Quick Evidence', all: 'All Signals', raw: 'Raw Integrity JSON',
       footer: 'A flagged signal is evidence, not a fraud verdict. Production decisions should combine these browser signals with server-side request, IP/ASN, replay, session history, identity and event-sequence evidence.',
       noSuspicious: 'No suspicious client-side signals were detected.', waiting: 'Waiting for scan…',
-      headers: ['Status','Detector','Category','Severity','Weight','Confidence','AppLovin']
+      headers: ['Status','Detector','Category','Severity','Weight','Confidence','AppLovin Evidence']
     },
     zh: {
       title: '浏览器完整性检测器',
@@ -34,11 +42,19 @@
         ['第 4 步', '截图或导出 JSON', '用「截图模式」生成更干净的对比截图；需要详细分析时用「复制 JSON」。']
       ],
       note: '注意：FLAG 只表示观察到了可疑证据，并不等于“确定作弊”。验证准确率时，建议用同一个 Collector 版本，同时测试正常浏览器和已知的自动化 / Spoofing 环境，再比较命中组合。',
+      evidenceTitle: 'AppLovin 证据等级 — 这些标签分别代表什么',
+      evidenceIntro: '这些标签描述的是“我们对 AppLovin 实现方式掌握了多强的证据”，不是作弊风险等级，也不代表页面里的所有 Detector 都是 AppLovin 当前正在使用的。',
+      evidence: [
+        ['AL-DIRECT', '直接确认', '已经从当前 AppLovin JavaScript 或可观察到的 AppLovin 网络 Payload 中确认了这个 exact signal / field。只有存在直接实现证据时才使用这个标签。'],
+        ['AL-PUBLIC', '公开确认的信号类别', 'AppLovin 官方文档、隐私披露或可观察到的 Pixel 流量确认会采集这一类原始 Signal / Category，但具体 Detector 规则、组合方式或阈值并没有被确认。'],
+        ['AL-ANALOG', '我们的等价检测', '这是我们为了实现相似 Integrity / Anti-Fraud 目标而补充的行业常见启发式 Detector。目前没有证据证明 AppLovin 使用了完全相同的检测逻辑。']
+      ],
+      evidenceFoot: '历史说明：之前页面里的 AL-CONFIRMED 已改名为 AL-PUBLIC，因为 “CONFIRMED” 很容易被误解成“这个具体 Detector 已被 AppLovin 实现确认”。目前这个 Demo 中大部分具体检测规则仍然属于 AL-ANALOG；只有以后从 AppLovin 代码或 Payload 中确认 exact signal / field 后，才应该升级为 AL-DIRECT。',
       shot: '截图模式', exitShot: '退出截图模式', copy: '复制 JSON', copied: '已复制', run: '重新检测', scanning: '检测中…',
       summary: '完整性结果摘要', flags: '异常信号数', total: '总信号数', max: '最高风险等级', weight: '启发式权重', env: '运行环境', suspicious: '可疑信号', quick: '关键证据', all: '全部检测项', raw: '原始 Integrity JSON',
       footer: 'FLAG 表示异常证据，不等于作弊结论。生产环境应结合服务端请求、IP/ASN、代理/VPN、重放、会话历史、Identity 和事件序列等信号做最终判断。',
       noSuspicious: '未检测到明显的客户端异常信号。', waiting: '等待检测…',
-      headers: ['状态','检测项','分类','风险等级','权重','置信度','AppLovin']
+      headers: ['状态','检测项','分类','风险等级','权重','置信度','AppLovin 证据等级']
     }
   };
 
@@ -72,12 +88,27 @@
     .bi-lang{display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:#fff}
     .bi-lang button{border:0;background:transparent;padding:9px 11px;font-weight:700;color:var(--muted);cursor:pointer}
     .bi-lang button.active{background:#111827;color:#fff}
-    .bi-howto{margin-bottom:18px}.bi-howgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .bi-howto,.bi-evidence{margin-bottom:18px}.bi-howgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
     .bi-step{background:var(--panel2);padding:13px;border-radius:10px;min-height:96px}.bi-stepno{font-size:10px;font-weight:800;color:#2563eb;letter-spacing:.04em}.bi-steptitle{font-size:13px;font-weight:750;margin-top:6px}.bi-stepdesc{font-size:11px;color:var(--muted);line-height:1.5;margin-top:5px}
     .bi-note{margin-top:12px;padding:11px 13px;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;color:#92400e;font-size:11px;line-height:1.55}
-    body.shot .bi-howto{display:none}@media(max-width:1000px){.bi-howgrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.bi-howgrid{grid-template-columns:1fr}}
+    .bi-evidence-intro{font-size:12px;color:var(--muted);line-height:1.55;margin:-2px 0 12px}.bi-evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .bi-evidence-item{border:1px solid var(--border);border-radius:10px;padding:13px;background:var(--panel2)}.bi-ev-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bi-ev-tag{display:inline-block;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.02em}.bi-direct{background:#ecfdf5;color:#047857}.bi-public{background:#eff6ff;color:#1d4ed8}.bi-analog{background:#f5f3ff;color:#6d28d9}.bi-ev-name{font-size:12px;font-weight:750}.bi-ev-desc{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}.bi-evidence-foot{font-size:10.5px;color:var(--muted);line-height:1.55;margin-top:11px}
+    body.shot .bi-howto,body.shot .bi-evidence{display:none}@media(max-width:1000px){.bi-howgrid{grid-template-columns:repeat(2,1fr)}.bi-evidence-grid{grid-template-columns:1fr}}@media(max-width:700px){.bi-howgrid{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
+
+  function normalizeMappings(report) {
+    if (!report || !Array.isArray(report.signals)) return report;
+    for (const s of report.signals) {
+      if (s && s.appLovinMapping && s.appLovinMapping.level === 'AL-CONFIRMED') {
+        s.appLovinMapping.level = 'AL-PUBLIC';
+      }
+    }
+    return report;
+  }
+
+  window.addEventListener('browser-integrity:report', event => normalizeMappings(event.detail), { capture: true });
+  if (window.__browserIntegrityLastReport) normalizeMappings(window.__browserIntegrityLastReport);
 
   const actions = document.querySelector('.actions');
   if (actions && !document.getElementById('biLang')) {
@@ -95,11 +126,23 @@
     box.className = 'card bi-howto'; box.id = 'biHowto';
     status.parentNode.insertBefore(box, status);
   }
+  if (status && !document.getElementById('biEvidence')) {
+    const box = document.createElement('div');
+    box.className = 'card bi-evidence'; box.id = 'biEvidence';
+    status.parentNode.insertBefore(box, status);
+  }
 
   function renderGuide() {
     const d = T[lang];
     const box = document.getElementById('biHowto'); if (!box) return;
     box.innerHTML = `<div class="section-title">${d.howTitle}</div><div class="bi-howgrid">${d.steps.map(s => `<div class="bi-step"><div class="bi-stepno">${s[0]}</div><div class="bi-steptitle">${s[1]}</div><div class="bi-stepdesc">${s[2]}</div></div>`).join('')}</div><div class="bi-note">${d.note}</div>`;
+  }
+
+  function renderEvidence() {
+    const d = T[lang];
+    const box = document.getElementById('biEvidence'); if (!box) return;
+    const cls = { 'AL-DIRECT':'bi-direct', 'AL-PUBLIC':'bi-public', 'AL-ANALOG':'bi-analog' };
+    box.innerHTML = `<div class="section-title">${d.evidenceTitle}</div><div class="bi-evidence-intro">${d.evidenceIntro}</div><div class="bi-evidence-grid">${d.evidence.map(e => `<div class="bi-evidence-item"><div class="bi-ev-head"><span class="bi-ev-tag ${cls[e[0]] || ''}">${e[0]}</span><span class="bi-ev-name">${e[1]}</span></div><div class="bi-ev-desc">${e[2]}</div></div>`).join('')}</div><div class="bi-evidence-foot">${d.evidenceFoot}</div>`;
   }
 
   function setText(selector, value) { const el=document.querySelector(selector); if(el) el.textContent=value; }
@@ -116,9 +159,8 @@
     if(run && !/Scanning|检测中/.test(run.textContent)) run.textContent=d.run;
     const zhBtn=document.getElementById('biZh'), enBtn=document.getElementById('biEn'); if(zhBtn)zhBtn.classList.toggle('active',lang==='zh');if(enBtn)enBtn.classList.toggle('active',lang==='en');
     renderGuide();
+    renderEvidence();
 
-    const cards=[...document.querySelectorAll('.card')];
-    const byId=id=>document.getElementById(id)?.closest('.card');
     const summaryCard=document.getElementById('flags')?.closest('.card'); if(summaryCard){const st=summaryCard.querySelector('.section-title');if(st)st.textContent=d.summary; const labels=summaryCard.querySelectorAll('.label');[d.flags,d.total,d.max,d.weight].forEach((v,i)=>{if(labels[i])labels[i].textContent=v;});}
     const envCard=document.getElementById('env')?.closest('.card'); if(envCard?.querySelector('.section-title'))envCard.querySelector('.section-title').textContent=d.env;
     const susCard=document.getElementById('suspicious')?.closest('.card'); if(susCard?.querySelector('.section-title'))susCard.querySelector('.section-title').textContent=d.suspicious;
@@ -131,6 +173,7 @@
     document.querySelectorAll('.sig-title').forEach(el=>el.textContent=translateTitle(el.textContent));
     document.querySelectorAll('#rows td:nth-child(2) strong').forEach(el=>el.textContent=translateTitle(el.textContent));
     document.querySelectorAll('.catname').forEach(el=>el.textContent=translateCat(el.textContent));
+    document.querySelectorAll('#rows td:nth-child(7), .maptag').forEach(el=>{if(el.textContent.trim()==='AL-CONFIRMED')el.textContent='AL-PUBLIC';});
     document.querySelectorAll('.pill').forEach(el=>{const flagged=el.classList.contains('flag'); el.textContent=lang==='zh'?(flagged?'异常':'正常'):(flagged?'FLAG':'OK');});
     document.querySelectorAll('.empty').forEach(el=>{if(/No suspicious|未检测到明显/.test(el.textContent))el.textContent=d.noSuspicious;else if(/Waiting for scan|等待检测/.test(el.textContent))el.textContent=d.waiting;});
     applying=false;
