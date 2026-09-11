@@ -34,7 +34,7 @@
 
   function annotate(report) {
     if (!report || !Array.isArray(report.signals)) return report;
-    report.evidenceSchemaVersion = '2.0';
+    report.evidenceSchemaVersion = '2.1';
     report.appLovinEvidenceModel = {
       collectionEvidence: {
         'AL-DIRECT-PIXEL': 'Exact raw signal/field directly observed in AppLovin Pixel (/v1/pixel) traffic.',
@@ -62,11 +62,22 @@
     return report;
   }
 
+  function badgeClass(value) {
+    switch (value) {
+      case 'AL-DIRECT-PIXEL': return 'bi-ev-pixel';
+      case 'AL-DIRECT-BS': return 'bi-ev-bs';
+      case 'AL-PUBLIC': return 'bi-ev-public';
+      case 'UNKNOWN': return 'bi-ev-unknown';
+      case 'AL-DIRECT': return 'bi-logic-direct';
+      case 'AL-INFERRED': return 'bi-logic-inferred';
+      case 'OUR-HEURISTIC': return 'bi-logic-ours';
+      case 'N/A': return 'bi-logic-na';
+      default: return 'bi-ev-unknown';
+    }
+  }
+
   function badge(value) {
-    const cls = value === 'AL-DIRECT-PIXEL' || value === 'AL-DIRECT-BS' || value === 'AL-DIRECT' ? 'bi-ev-direct' :
-      value === 'AL-PUBLIC' || value === 'AL-INFERRED' ? 'bi-ev-public' :
-      value === 'OUR-HEURISTIC' ? 'bi-ev-ours' : 'bi-ev-unknown';
-    return `<span class="bi-evidence-badge ${cls}">${value}</span>`;
+    return `<span class="bi-evidence-badge ${badgeClass(value)}">${value}</span>`;
   }
 
   function isZh() {
@@ -79,12 +90,12 @@
     if (!table || !report || !Array.isArray(report.signals)) return;
     annotate(report);
 
-    const tr = table.querySelector('thead tr');
-    if (tr) {
+    const head = table.querySelector('thead tr');
+    if (head) {
       const labels = isZh()
         ? ['状态','检测项','分类','风险等级','权重','置信度','采集证据','检测逻辑']
         : ['Status','Detector','Category','Severity','Weight','Confidence','Collection Evidence','Detection Logic'];
-      tr.innerHTML = labels.map(x => `<th>${x}</th>`).join('');
+      head.innerHTML = labels.map(x => `<th>${x}</th>`).join('');
     }
 
     const byId = new Map(report.signals.map(s => [s.id, s]));
@@ -110,7 +121,7 @@
       const meta = signal.appLovinMapping;
       const tag = node.querySelector('.maptag');
       if (tag) {
-        tag.textContent = `${meta.collectionEvidence.join(' + ')} · ${meta.detectionLogic}`;
+        tag.innerHTML = `${meta.collectionEvidence.map(badge).join(' ')} ${badge(meta.detectionLogic)}`;
         tag.title = meta.evidenceDetail || '';
       }
     });
@@ -119,22 +130,45 @@
     if (json) json.textContent = JSON.stringify(report, null, 2);
   }
 
+  function scheduleEnhance() {
+    requestAnimationFrame(() => requestAnimationFrame(enhanceTable));
+  }
+
   const style = document.createElement('style');
   style.textContent = `
-    .bi-evidence-badge{display:inline-block;padding:3px 6px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap;margin:1px 2px 1px 0}
-    .bi-ev-direct{background:#ecfdf5;color:#047857}.bi-ev-public{background:#eff6ff;color:#1d4ed8}.bi-ev-ours{background:#f5f3ff;color:#6d28d9}.bi-ev-unknown{background:#f3f4f6;color:#4b5563}
-    #rows td:nth-child(7),#rows td:nth-child(8){min-width:125px}
+    .bi-evidence-badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap;margin:1px 3px 1px 0;border:1px solid transparent;line-height:1.35}
+    .bi-ev-pixel{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+    .bi-ev-bs{background:#ecfeff;color:#0e7490;border-color:#a5f3fc}
+    .bi-ev-public{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+    .bi-ev-unknown{background:#f3f4f6;color:#4b5563;border-color:#e5e7eb}
+    .bi-logic-direct{background:#dcfce7;color:#166534;border-color:#86efac}
+    .bi-logic-inferred{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+    .bi-logic-ours{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+    .bi-logic-na{background:#f8fafc;color:#64748b;border-color:#e2e8f0}
+    #rows td:nth-child(7),#rows td:nth-child(8){min-width:145px}
+    .maptag .bi-evidence-badge{font-size:8px;padding:2px 5px;margin-top:3px}
   `;
   document.head.appendChild(style);
 
-  window.addEventListener('browser-integrity:report', event => annotate(event.detail), { capture: true });
-  if (window.__browserIntegrityLastReport) annotate(window.__browserIntegrityLastReport);
+  // Annotate synchronously when the collector emits its report. The page's render()
+  // then receives the already-annotated object. Render badges once after that render.
+  window.addEventListener('browser-integrity:report', event => {
+    annotate(event.detail);
+    scheduleEnhance();
+  }, { capture: true });
 
-  let timer;
-  const observer = new MutationObserver(() => {
-    clearTimeout(timer);
-    timer = setTimeout(enhanceTable, 40);
+  if (window.__browserIntegrityLastReport) {
+    annotate(window.__browserIntegrityLastReport);
+    scheduleEnhance();
+  }
+
+  // Language buttons are created later by i18n.js. Use delegated clicks so the table
+  // header can be refreshed after language changes, without observing/mutating the DOM continuously.
+  document.addEventListener('click', event => {
+    const id = event.target && event.target.id;
+    if (id === 'biZh' || id === 'biEn') scheduleEnhance();
   });
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-  setTimeout(enhanceTable, 100);
+
+  // Expose a small explicit API for future UI updates. No MutationObserver is used.
+  window.AppLovinEvidence = Object.freeze({ annotate, enhanceTable: scheduleEnhance, metaFor });
 })();
